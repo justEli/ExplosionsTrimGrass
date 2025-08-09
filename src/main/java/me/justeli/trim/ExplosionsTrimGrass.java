@@ -23,7 +23,6 @@ import java.util.function.Consumer;
  */
 public final class ExplosionsTrimGrass extends JavaPlugin {
     // todo:
-    //  - choose y-level instead of sea level
     //  - blacklist for biomes
 
     private ConfigCache configCache;
