@@ -15,7 +15,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Eli
