@@ -1,0 +1,15 @@
+main: '${project.groupId}.${project.name}'
+name: '${project.name}'
+version: '${project.version}'
+authors: [JustEli]
+website: '${project.url}'
+api-version: '${versions.minecraft.major}'
+folia-supported: true
+dependencies:
+  server:
+    GriefPrevention:
+      load: BEFORE
+      required: false
+    WorldGuard:
+      load: BEFORE
+      required: false

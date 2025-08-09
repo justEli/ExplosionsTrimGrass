@@ -1,9 +1,0 @@
-main: "${project.groupId}.${project.name}"
-name: "${project.name}"
-version: "${project.version}"
-author: JustEli
-website: "${project.url}"
-api-version: "${versions.minecraft.major}"
-loadbefore:
-  - GriefPrevention
-  - WorldGuard
