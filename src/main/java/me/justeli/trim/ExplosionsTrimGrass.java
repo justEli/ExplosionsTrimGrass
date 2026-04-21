@@ -19,7 +19,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class ExplosionsTrimGrass extends JavaPlugin {
     // todo:
     //  - blacklist for biomes
-    //  - test game rule for mob griefing and add checks
 
     private ConfigCache configCache;
     private ScheduleUtil scheduleUtil;
