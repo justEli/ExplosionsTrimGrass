@@ -5,32 +5,39 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Explosive;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 /**
  * @author Eli
  * @since April 29, 2021 (me.justeli.trim.handlers)
  */
-public final class EntityDamageHandler {
+public final class EntityDamageHandler implements Listener {
+    private final ExplosionsTrimGrass plugin;
     public EntityDamageHandler(ExplosionsTrimGrass plugin) {
-        plugin.registerEvent(EntityDamageByEntityEvent.class, event -> {
-            if (!plugin.getConfigCache().disableDamageToNonMobs()) {
-                return;
-            }
+        this.plugin = plugin;
+        plugin.parseEventHandlers(this);
+    }
 
-            if (event.getEntity() instanceof Player || event.getEntity() instanceof Mob) {
-                return;
-            }
+    @EventHandler
+    void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
+        if (!plugin.getConfigCache().disableDamageToNonMobs()) {
+            return;
+        }
 
-            if (!(event.getDamager() instanceof Explosive) && !(event.getDamager() instanceof Creeper)) {
-                return;
-            }
+        if (event.getEntity() instanceof Player || event.getEntity() instanceof Mob) {
+            return;
+        }
 
-            if (plugin.getConfigCache().isOnlyEnabledForCreepers() && !(event.getDamager() instanceof Creeper)) {
-                return;
-            }
+        if (!(event.getDamager() instanceof Explosive) && !(event.getDamager() instanceof Creeper)) {
+            return;
+        }
 
-            event.setCancelled(true);
-        });
+        if (plugin.getConfigCache().isOnlyEnabledForCreepers() && !(event.getDamager() instanceof Creeper)) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 }

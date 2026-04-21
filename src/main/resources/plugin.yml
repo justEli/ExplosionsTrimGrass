@@ -4,12 +4,10 @@ version: '${project.version}'
 authors: [JustEli]
 website: '${project.url}'
 api-version: '${versions.minecraft}'
-folia-supported: true
-dependencies:
-  server:
-    GriefPrevention:
-      load: BEFORE
-      required: false
-    WorldGuard:
-      load: BEFORE
-      required: false
+loadbefore:
+  - GriefPrevention
+  - WorldGuard
+commands:
+  'etg':
+    permission: 'etg.admin'
+    description: 'Admin command to manage ExplosionsTrimGrass.'

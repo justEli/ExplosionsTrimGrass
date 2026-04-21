@@ -19,18 +19,18 @@ public final class ConfiguredBlock {
 
     private static final SplittableRandom RANDOM = new SplittableRandom();
 
-    public ConfiguredBlock(int maximumYLevel, boolean disabledInClaims, boolean disabledInRegions, Map<String, Object> transformations) {
+    public ConfiguredBlock(int maximumYLevel, boolean disabledInClaims, boolean disabledInRegions, Map<Material, Object> map) {
         this.maximumYLevel = maximumYLevel;
         this.disabledInClaims = disabledInClaims;
         this.disabledInRegions = disabledInRegions;
 
         double adding = 0;
-        for (Map.Entry<String, Object> map : transformations.entrySet()) {
-            this.transformations.put(adding, Material.matchMaterial(map.getKey().toUpperCase()));
-            adding += (double) map.getValue();
+        for (var entry : map.entrySet()) {
+            transformations.put(adding, entry.getKey());
+            adding += (double) entry.getValue();
         }
 
-        this.transformations.put(adding, null);
+        transformations.put(adding, null);
     }
 
     public int getMaximumYLevel() {

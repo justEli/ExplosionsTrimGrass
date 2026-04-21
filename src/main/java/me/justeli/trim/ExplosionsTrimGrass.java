@@ -1,21 +1,18 @@
 package me.justeli.trim;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import me.justeli.trim.command.EtgCommandSpigot;
 import me.justeli.trim.util.MetricsRegistry;
-import me.justeli.trim.command.EtgCommand;
+import me.justeli.trim.command.EtgCommandPaper;
 import me.justeli.trim.config.ConfigCache;
 import me.justeli.trim.handler.EntityDamageHandler;
 import me.justeli.trim.integration.Integration;
 import me.justeli.trim.handler.TrimEffectHandler;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventPriority;
+import me.justeli.trim.util.ScheduleUtil;
+import me.justeli.trim.util.SoftwareUtil;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * @author Eli
@@ -26,39 +23,41 @@ public final class ExplosionsTrimGrass extends JavaPlugin {
     //  - blacklist for biomes
 
     private ConfigCache configCache;
+    private ScheduleUtil scheduleUtil;
 
     @Override
     public void onEnable() {
-        this.configCache = new ConfigCache(this);
+        if (SoftwareUtil.getPlatform() == SoftwareUtil.Platform.BUKKIT) {
+            getLogger().log(Level.SEVERE, "Bukkit is not supported. Plugin will be disabled.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
-        new EtgCommand(this);
+        this.configCache = new ConfigCache(this);
+        this.scheduleUtil = new ScheduleUtil(this);
+
+        if (SoftwareUtil.isPlatformAtLeast(SoftwareUtil.Platform.PAPER)) {
+            new EtgCommandPaper(this);
+        }
+        else {
+            new EtgCommandSpigot(this);
+        }
+
         new TrimEffectHandler(this);
         new EntityDamageHandler(this);
         new Integration(this);
         new MetricsRegistry(this);
     }
 
+    public void parseEventHandlers(Listener listener) {
+        getServer().getPluginManager().registerEvents(listener, this);
+    }
+
     public ConfigCache getConfigCache() {
         return configCache;
     }
 
-    public <T extends Event> void registerEvent(Class<T> eventType, EventPriority priority, Consumer<T> event) {
-        getServer().getPluginManager().registerEvent(
-            eventType, new Listener() {}, priority, ((ignored, e) -> {
-                if (eventType.isInstance(e)) {
-                    event.accept(eventType.cast(e));
-                }
-            }), this
-        );
-    }
-
-    public <T extends Event> void registerEvent(Class<T> eventType, Consumer<T> event) {
-        registerEvent(eventType, EventPriority.NORMAL, event);
-    }
-
-    public void registerCommand(LiteralCommandNode<CommandSourceStack> node, Collection<String> aliases) {
-        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
-            event.registrar().register(node, aliases)
-        );
+    public ScheduleUtil getScheduler() {
+        return scheduleUtil;
     }
 }

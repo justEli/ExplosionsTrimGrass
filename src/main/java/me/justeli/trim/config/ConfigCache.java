@@ -2,13 +2,17 @@ package me.justeli.trim.config;
 
 import me.justeli.trim.ExplosionsTrimGrass;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class ConfigCache {
     private final ExplosionsTrimGrass plugin;
-
     public ConfigCache(ExplosionsTrimGrass plugin) {
         this.plugin = plugin;
         plugin.saveDefaultConfig();
@@ -38,27 +41,36 @@ public final class ConfigCache {
         return onlyEnableForCreepers.get();
     }
 
-    private final HashMap<Material, ConfiguredBlock> configuredBlocks = new HashMap<>();
-    private final HashMap<String, Set<Material>> definitions = new HashMap<>();
+    private final Map<Material, ConfiguredBlock> configuredBlocks = new HashMap<>();
+    private final Map<String, Set<Material>> definitions = new HashMap<>();
 
     public ConfiguredBlock getConfiguredBlock(Material material) {
         return configuredBlocks.computeIfAbsent(material, empty -> null);
     }
 
-    private Set<Material> getBlockFromName(String name) {
-        try {
-            return definitions.computeIfAbsent(
-                name.toUpperCase(),
-                empty -> new HashSet<>(Collections.singleton(Material.matchMaterial(name.toUpperCase())))
-            );
-        }
-        catch (EnumConstantNotPresentException exception) {
-            plugin.getLogger().warning(String.format(
-                "Found '%s' in 'transform-blocks', but it is not a defined block. Skipped.",
-                name.toUpperCase()
-            ));
+    private @Nullable Material parseMaterial(String name) {
+        var key = NamespacedKey.fromString(name);
+        if (key == null) {
             return null;
         }
+
+        return Registry.MATERIAL.get(key);
+    }
+
+    private @Nullable Set<Material> getBlocksFromName(String name) {
+        var defined = definitions.get(name);
+        if (defined != null) {
+            return defined;
+        }
+
+        var material = parseMaterial(name);
+        if (material == null) {
+            return null;
+        }
+
+        var materials = new HashSet<>(Collections.singleton(material));
+        definitions.put(name, materials);
+        return materials;
     }
 
     public long reload() {
@@ -92,24 +104,19 @@ public final class ConfigCache {
             Set<Material> converted = new HashSet<>();
 
             for (String material : materialList) {
-                try {
-                    var matched = Material.matchMaterial(material.toUpperCase());
-                    if (matched == null) {
-                        throw new IllegalArgumentException();
-                    }
-
-                    converted.add(matched);
-                }
-                catch (EnumConstantNotPresentException | IllegalArgumentException exception) {
+                var matched = parseMaterial(material);
+                if (matched == null) {
                     plugin.getLogger().warning(String.format(
-                        "Found '%s' in the definition list of '%s', but it is not a material. Skipped.",
-                        material.toUpperCase(),
-                        key.toUpperCase()
+                        "Found invalid material type '%s' in the definition list of '%s'. Skipped.",
+                        material, key
                     ));
+                    continue;
                 }
+
+                converted.add(matched);
             }
 
-            this.definitions.put(key.toUpperCase(), converted);
+            definitions.put(key, converted);
         }
     }
 
@@ -133,9 +140,16 @@ public final class ConfigCache {
         totalTransformers.set(keys.size());
 
         for (String key : keys) {
-            Set<Material> materials = getBlockFromName(key.toUpperCase());
+            Set<Material> materials = getBlocksFromName(key);
+            if (materials == null) {
+                plugin.getLogger().warning(
+                    "Found undefined block list '%s' in 'transform-blocks'. Skipped.".formatted(key)
+                );
+                continue;
+            }
+
             ConfigurationSection part = section.getConfigurationSection(key);
-            if (materials == null || part == null) {
+            if (part == null) {
                 continue;
             }
 
@@ -144,13 +158,29 @@ public final class ConfigCache {
                 continue;
             }
 
+            // parsing materials from 'conversion'
+            Map<Material, Object> conversions = new HashMap<>();
+            for (var entry : conversion.getValues(false).entrySet()) {
+                var material = parseMaterial(entry.getKey());
+                if (material == null) {
+                    plugin.getLogger().warning(String.format(
+                        "Found invalid material type '%s' in 'transform-blocks.%s.conversion'. Skipped.",
+                        entry.getKey(), key
+                    ));
+                    continue;
+                }
+                conversions.put(material, entry.getValue());
+            }
+
+            var configuredBlock = new ConfiguredBlock(
+                part.getInt("maximum-y-level", maximumYLevel),
+                part.getBoolean("disable-in-claims", disableInClaims),
+                part.getBoolean("disable-in-regions", disableInRegions),
+                conversions
+            );
+
             for (Material material : materials) {
-                configuredBlocks.put(material, new ConfiguredBlock(
-                    part.getInt("maximum-y-level", maximumYLevel),
-                    part.getBoolean("disable-in-claims", disableInClaims),
-                    part.getBoolean("disable-in-regions", disableInRegions),
-                    conversion.getValues(false)
-                ));
+                configuredBlocks.put(material, configuredBlock);
             }
         }
     }
