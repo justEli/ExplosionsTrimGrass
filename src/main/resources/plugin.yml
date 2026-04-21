@@ -3,10 +3,7 @@ name: '${project.name}'
 version: '${project.version}'
 authors: [JustEli]
 website: '${project.url}'
-api-version: '${versions.minecraft}'
-loadbefore:
-  - GriefPrevention
-  - WorldGuard
+api-version: '${versions.minecraft.spigot}'
 commands:
   'etg':
     permission: 'etg.admin'

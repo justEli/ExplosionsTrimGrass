@@ -12,8 +12,6 @@ import me.justeli.trim.util.SoftwareUtil;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.logging.Level;
-
 /**
  * @author Eli
  * @since December 9, 2019 (me.justeli.trim)
@@ -21,6 +19,7 @@ import java.util.logging.Level;
 public final class ExplosionsTrimGrass extends JavaPlugin {
     // todo:
     //  - blacklist for biomes
+    //  - test game rule for mob griefing and add checks
 
     private ConfigCache configCache;
     private ScheduleUtil scheduleUtil;
@@ -28,7 +27,7 @@ public final class ExplosionsTrimGrass extends JavaPlugin {
     @Override
     public void onEnable() {
         if (SoftwareUtil.getPlatform() == SoftwareUtil.Platform.BUKKIT) {
-            getLogger().log(Level.SEVERE, "Bukkit is not supported. Plugin will be disabled.");
+            getLogger().severe("Bukkit is not supported. Plugin will be disabled.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -37,7 +36,12 @@ public final class ExplosionsTrimGrass extends JavaPlugin {
         this.scheduleUtil = new ScheduleUtil(this);
 
         if (SoftwareUtil.isPlatformAtLeast(SoftwareUtil.Platform.PAPER)) {
-            new EtgCommandPaper(this);
+            if (SoftwareUtil.getMinecraftVersion() > 20) {
+                new EtgCommandPaper(this);
+            }
+            else {
+                getLogger().warning("Could not register commands for this Minecraft version.");
+            }
         }
         else {
             new EtgCommandSpigot(this);

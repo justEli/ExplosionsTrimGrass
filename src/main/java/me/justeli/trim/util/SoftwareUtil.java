@@ -1,5 +1,9 @@
 package me.justeli.trim.util;
 
+import org.bukkit.Bukkit;
+
+import java.util.regex.Pattern;
+
 /**
  * @author Eli
  * @since April 20, 2026
@@ -10,6 +14,7 @@ public final class SoftwareUtil {
     }
 
     private static final Platform PLATFORM = findPlatform();
+    private static final int VERSION = findVersion();
 
     public static boolean isPlatformAtLeast(Platform platform) {
         return PLATFORM.ordinal() >= platform.ordinal();
@@ -17,6 +22,10 @@ public final class SoftwareUtil {
 
     public static Platform getPlatform() {
         return PLATFORM;
+    }
+
+    public static int getMinecraftVersion() {
+        return VERSION;
     }
 
     private static boolean hasClass(String className) {
@@ -42,5 +51,23 @@ public final class SoftwareUtil {
         else {
             return Platform.BUKKIT;
         }
+    }
+
+    /// 1.19 -> 19, 26.1 -> 26
+    private static int findVersion() {
+        Pattern versionPattern = Pattern.compile("\\(\\w+: (\\d+)\\.(\\d+)\\.?(\\d+)?.*\\)");
+        var matcher = versionPattern.matcher(Bukkit.getVersion());
+
+        int version = 0;
+        if (matcher.find()) {
+            try {
+                var matchResult = matcher.toMatchResult();
+                int major = Integer.parseInt(matchResult.group(1), 10);
+                version = (major == 1)? Integer.parseInt(matchResult.group(2), 10) : major;
+            }
+            catch (Exception ignored) {}
+        }
+
+        return version;
     }
 }

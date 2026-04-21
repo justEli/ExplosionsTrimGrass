@@ -15,7 +15,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <versions.minecraft>1.20.6</versions.minecraft>
+        <versions.minecraft.paper>1.20.6</versions.minecraft.paper>
+        <versions.minecraft.spigot>1.19</versions.minecraft.spigot> <!-- 1.19.4 -->
     </properties>
 
     <repositories>
@@ -81,19 +82,19 @@
         <dependency>
             <groupId>dev.folia</groupId>
             <artifactId>folia-api</artifactId>
-            <version>${versions.minecraft}-R0.1-SNAPSHOT</version>
+            <version>${versions.minecraft.paper}-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>${versions.minecraft}-R0.1-SNAPSHOT</version>
+            <version>${versions.minecraft.spigot}-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>${versions.minecraft}-R0.1-SNAPSHOT</version>
+            <version>${versions.minecraft.paper}-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

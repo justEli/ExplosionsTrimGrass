@@ -29,6 +29,14 @@ public final class TrimEffectHandler implements Listener {
         plugin.parseEventHandlers(this);
     }
 
+    private static Particle BLOCK_PARTICLE;
+    static {
+        try { BLOCK_PARTICLE = Particle.valueOf("BLOCK"); }
+        catch (Throwable throwable) { // older versions
+            BLOCK_PARTICLE = Particle.valueOf("BLOCK_CRACK");
+        }
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     void onEntityExplodeEvent(EntityExplodeEvent event) {
         if (!(event.getEntity() instanceof Explosive) && !(event.getEntity() instanceof Creeper)) {
@@ -80,7 +88,8 @@ public final class TrimEffectHandler implements Listener {
                 }
                 else if (block.getLocation().getBlock().getRelative(BlockFace.UP).getType() == Material.AIR) {
                     Location location = block.getLocation().clone().add(0.5, 1.05, 0.5);
-                    world.spawnParticle(Particle.BLOCK, location, 30, 0.5, 0, 0.5, block.getType().createBlockData());
+                    world.spawnParticle(BLOCK_PARTICLE, location, 30, 0.5, 0, 0.5, block.getType().createBlockData());
+
                     block.setType(setTo);
                 }
             }
