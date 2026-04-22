@@ -5,3 +5,11 @@ authors: [JustEli]
 website: '${project.url}'
 api-version: '${versions.minecraft.spigot}'
 folia-supported: true
+dependencies:
+  server:
+    'GriefPrevention':
+      load: BEFORE
+      required: false
+    'WorldGuard':
+      load: BEFORE
+      required: false

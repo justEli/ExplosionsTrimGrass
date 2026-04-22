@@ -8,3 +8,6 @@ commands:
   'etg':
     permission: 'etg.admin'
     description: 'Admin command to manage ExplosionsTrimGrass.'
+softdepend:
+  - 'GriefPrevention'
+  - 'WorldGuard'
