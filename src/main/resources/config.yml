@@ -71,6 +71,9 @@ transform-blocks:
     disable-in-claims: true
     conversion:
       'minecraft:air': 1.00
+  # Please note: You could also simply remove a whole section, for example below here, if
+  #  you don't want glass_panes to be affected by explosions. It also goes the other way:
+  #  add another section for different kind of blocks if you want those to be affected.
   'etg:glass_panes':
     disable-in-claims: true
     conversion:
